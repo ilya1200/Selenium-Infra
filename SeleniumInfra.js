@@ -1,4 +1,4 @@
-const { Builder, By, Key } = require('selenium-webdriver');
+const { Builder, By, Key, until } = require('selenium-webdriver');
 const path = require('chromedriver').path;
 const chrome = require('selenium-webdriver/chrome');
 let service = new chrome.ServiceBuilder(path).build();
@@ -8,14 +8,12 @@ class SeleniumInfra {
 
     constructor() {
         this.driver = new Builder().forBrowser("chrome").build();
-        console.log("Driver created");
     }
 
-    
+
     async getUrl(URL = "") {
         try {
             await this.driver.get(URL);
-            console.log(`Driver set to url: ${URL}`);
         } catch (error) {
             const reason = `Failed to GET the URL: ${URL} `;
             error = new Error(reason);
@@ -26,7 +24,6 @@ class SeleniumInfra {
     async close() {
         try {
             await this.driver.quit();
-            console.log("Driver Closed");
         } catch (error) {
             const reason = `Failed to close driver.`;
             error = new Error(reason);
@@ -48,8 +45,6 @@ class SeleniumInfra {
                 .catch(() => {
                     throw new Error(`Found but Could NOT click on element with locator (${locator}) and locator type (${locatorType})`)
                 });
-
-            console.log(`Clicked on element with locator (${locator}) and locator type (${locatorType}).`)
         }
         catch (error) {
             console.error(error)
@@ -66,7 +61,6 @@ class SeleniumInfra {
                     throw new Error(`Found the element, but COULD NOT WRITE into it the data :(${data}).`);
                 });
 
-            console.log(`Write (${data}) to element.`);
         } catch (error) {
             console.error(error);
         }
@@ -94,8 +88,6 @@ class SeleniumInfra {
             await element.clear().catch(() => {
                 throw new Error("Found the element, but could NOT clear it")
             });
-
-            console.log(`Cleared element with locator (${locator}) and locator type (${locatorType})`)
         } catch (error) {
             return Promise.reject(error);
         }
@@ -104,7 +96,7 @@ class SeleniumInfra {
 
     async isElementExists(locator = "", locatorType = "id", fromElement = null) {
         try {
-            await this.findElementBy(locator, locatorType ,fromElement);
+            await this.findElementBy(locator, locatorType, fromElement);
             return true;
         } catch{
             return false;
@@ -119,7 +111,6 @@ class SeleniumInfra {
             }
 
             const element = await fromElement.findElement(By[locatorType](locator));
-            console.log(`Found an element with locator (${locator}) and locator type (${locatorType})`)
             return element;
         } catch (error) {
             const reason = `Could not find an element with : locator (${locator}), locatorType (${locatorType})`;
@@ -135,7 +126,6 @@ class SeleniumInfra {
             }
 
             const elementList = await fromElement.findElements(By[locatorType](locator));
-            console.log(`Found list of elements with locator (${locator}) ,locator type (${locatorType})`)
             return elementList;
         } catch (error) {
             const reason = `Could not find a list of elements BY: locator (${locator}) ,locatorType (${locatorType})`;
@@ -143,6 +133,16 @@ class SeleniumInfra {
             return Promise.reject(error);
         }
     }
+
+    async URLvalidation(pageName) {
+        try {
+            const isValid = await this.driver.wait(until.urlContains(pageName), 8000);
+            return isValid;
+        } catch (error) {
+            return false;
+        }
+    }
 }
 
 module.exports = SeleniumInfra;
+
