@@ -13,7 +13,9 @@ class SeleniumInfra {
 
     async getUrl(URL = "") {
         try {
+            await this.driver.manage().window().maximize();
             await this.driver.get(URL);
+
         } catch (error) {
             const reason = `Failed to GET the URL: ${URL} `;
             error = new Error(reason);
@@ -41,10 +43,9 @@ class SeleniumInfra {
             if (!element) {
                 element = await this.findElementBy(locator, locatorType, fromElement);
             }
-            await element.click()
-                .catch(() => {
-                    throw new Error(`Found but Could NOT click on element with locator (${locator}) and locator type (${locatorType})`)
-                });
+
+            await element.click();
+            await this.driver.sleep(2000);
         }
         catch (error) {
             console.error(error)
